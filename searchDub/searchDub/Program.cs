@@ -6,12 +6,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+
 namespace searchDub
 {
     class Program
     {
         static void Main(string[] args)
         {
+
             int depth = 0;
             bool printProcesTime = false;
             bool extendedOutput = false;
