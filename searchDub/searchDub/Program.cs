@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace searchDub
@@ -25,7 +27,7 @@ namespace searchDub
             }
 
             //handle input arguments
-            for (int i = 1; i < args.Length; i++)
+            for (int i = 0; i < args.Length; i++)
             {
                 try
                 {
@@ -100,6 +102,26 @@ namespace searchDub
                 }
 
             }
+
+            Stopwatch timer = new Stopwatch();
+            timer.Start();
+
+            //TODO run programm here
+
+            timer.Stop();
+            if (printProcesTime)
+            {
+                TimeSpan ts = timer.Elapsed;
+                string elapsedTime = String.Format("{0:00}.{1:000}",ts.TotalSeconds, ts.Milliseconds );
+                Console.WriteLine("RunTime: " + elapsedTime+" seconds");
+            }
+            if (waitBeforeTerminate)
+            {
+                Console.Write("Press any key to exit...");
+                //Console.ReadLine();
+                Console.ReadKey();
+            }
+
         }
 
         private static void printHelp()
