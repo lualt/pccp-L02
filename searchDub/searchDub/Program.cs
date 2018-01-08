@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -52,7 +53,8 @@ namespace searchDub
                     }
                     else if (argument == "-f")
                     {
-                        filter.Add(args[i + 1]);
+                        string[] temp = args[i + 1].Split(';');
+                        filter.AddRange(temp);
                         i++;
                     }
                     else if (argument == "-t")
@@ -105,17 +107,48 @@ namespace searchDub
 
             }
 
+            //if no filter is set add filter to all
+            if (filter.Count == 0)
+            {
+                filter.Add("*");
+            }
+
+            Console.WriteLine("Started finding multibe files files...");
             Stopwatch timer = new Stopwatch();
             timer.Start();
 
-            //TODO run programm here
+            //get all files and their size
+            GetFiles getFiles = new GetFiles();
+            ConcurrentDictionary<long, string> files = new ConcurrentDictionary<long, string>();
+            foreach (string entry in path)
+            {
+                getFiles.getFilesFromDirectory(entry, depth, filter,files);
+            }
+
+
+            // get all files that have the same size
+            ConcurrentDictionary<long, string> doubleFiles = new ConcurrentDictionary<long, string>();
+            foreach (KeyValuePair<long, string> entry in files)
+            {
+                if (entry.Value.Contains(";"))
+                {
+                    doubleFiles.TryAdd(entry.Key, entry.Value);
+                }
+            }
+
+            //TODO Compare files with byte by byte
 
             timer.Stop();
+            if (extendedOutput)
+            {
+                Console.WriteLine("\nAnzahl gefundener Dateien mit unterschiedlicher Dateigröße: "+ files.Count());
+                Console.WriteLine("Gefundene Dateien mit gleicher Dateigröße: " + doubleFiles.Count());
+            }
             if (printProcesTime)
             {
                 TimeSpan ts = timer.Elapsed;
                 string elapsedTime = String.Format("{0:00}.{1:000}",ts.TotalSeconds, ts.Milliseconds );
-                Console.WriteLine("RunTime: " + elapsedTime+" seconds");
+                Console.WriteLine("\nRunTime: " + elapsedTime+" seconds\n");
             }
             if (waitBeforeTerminate)
             {
