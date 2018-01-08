@@ -80,7 +80,7 @@ namespace searchDub
                     }
                     catch (Exception e)
                     {
-                        Console.Error.WriteLine(e.Message + "\n of File: " + currentFile);
+                        Console.Error.WriteLine(e.Message + "\n->of File: " + currentFile);
                     }
 
                 }

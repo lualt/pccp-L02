@@ -19,7 +19,8 @@ namespace searchDub
             bool printProcesTime = false;
             bool extendedOutput = false;
             bool waitBeforeTerminate = false;
-            uint maxThreads = 0;
+            int maxThreads = 0;
+            uint doubleDataFound = 0;
             List<string> path = new List<string>();
             List<string> filter = new List<string>();
 
@@ -59,7 +60,7 @@ namespace searchDub
                     }
                     else if (argument == "-t")
                     {
-                        maxThreads = uint.Parse(args[i + 1]);
+                        maxThreads = int.Parse(args[i + 1]);
                         if (depth <= 0)
                         {
                             Console.WriteLine("Error: there must be at least 1 Thread");
@@ -136,13 +137,42 @@ namespace searchDub
                 }
             }
 
-            //TODO Compare files with byte by byte
+            //Compare files with same size
+            CompareFiles compareFiles = new CompareFiles();
+            List<string> realDoubleFiles = new List<string>();
+            if (maxThreads == 0)
+            {
+                Parallel.ForEach(files, (entry) =>
+                            {
+                                compareFiles.compareFileTest(entry.Value, realDoubleFiles);
+                            });
+            }
+            else
+            {
+                Parallel.ForEach(files, new ParallelOptions { MaxDegreeOfParallelism = maxThreads },
+                            (entry) =>
+                            {
+                                compareFiles.compareFileTest(entry.Value, realDoubleFiles);
+                            });
+            }
+
+            //print files
+            foreach (string pathes in realDoubleFiles)
+            {
+                Console.WriteLine("Files with the same content:");
+                string[] temp = pathes.Split(';');
+                    foreach(string tempPath in temp)
+                {
+                    Console.WriteLine("\t"+tempPath);
+                }
+            }
 
             timer.Stop();
             if (extendedOutput)
             {
                 Console.WriteLine("\nAnzahl gefundener Dateien mit unterschiedlicher Dateigröße: "+ files.Count());
                 Console.WriteLine("Gefundene Dateien mit gleicher Dateigröße: " + doubleFiles.Count());
+                Console.WriteLine("Gefundene Doppelte Dateien: " + realDoubleFiles.Count());
             }
             if (printProcesTime)
             {
